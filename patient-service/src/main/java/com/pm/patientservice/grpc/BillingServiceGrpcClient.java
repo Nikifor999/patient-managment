@@ -1,5 +1,7 @@
 package com.pm.patientservice.grpc;
 
+import billing.BillingRequest;
+import billing.BillingResponse;
 import billing.BillingServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -22,6 +24,19 @@ public class BillingServiceGrpcClient {
         ManagedChannel channel = ManagedChannelBuilder.forAddress(serverAddress,
                 serverPort).usePlaintext().build();
 
-        blockingStub = BillingServiceGrpc.newBlockingStub(channel);
+        blockingStub = BillingServiceGrpc.newBlockingStub(channel);//technically its our grpc client that is gonna wait for the responses
+    }
+
+    public BillingResponse createBillingAccount(String patientId, String name,
+                                                String email){
+        BillingRequest request = BillingRequest.newBuilder()
+                .setPatientId(patientId)
+                .setEmail(email)
+                .setName(name)
+                .build();
+
+        BillingResponse response = blockingStub.createBillingAccount(request);
+        log.info("Received response from billing service via GRPC: {}", response);
+        return response;
     }
 }
