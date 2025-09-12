@@ -28,7 +28,6 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <os.detected.classifier>${os.detected.classifier}</os.detected.classifier>
     </properties>
     <dependencies>
         <dependency>
