@@ -31,6 +31,7 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponseDTO(tokenOptional.get()));
     }
 
+    @Operation(summary = "validate a token for user")
     @GetMapping("/validate")
     public ResponseEntity<Void> validateToken(
             @RequestHeader("Authorization") String authHeader){
