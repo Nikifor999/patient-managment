@@ -8,21 +8,23 @@ import java.time.LocalDate;
 
 public class PatientMapper {
     public static PatientResponseDTO toDTO(Patient patient) {
+        if (patient == null) return null;
         PatientResponseDTO patientDTO = new PatientResponseDTO();
-        patientDTO.setId(patient.getId().toString());
+        patientDTO.setId(patient.getId() == null ? null : patient.getId().toString());
         patientDTO.setName(patient.getName());
         patientDTO.setAddress(patient.getAddress());
         patientDTO.setEmail(patient.getEmail());
-        patientDTO.setDateOfBirth(patient.getDateOfBirth().toString());
+        patientDTO.setDateOfBirth(patient.getDateOfBirth() == null ? null : patient.getDateOfBirth().toString());
         return patientDTO;
     }
-    public static Patient toModel(PatientRequestDTO patientDTO) {
+    public static Patient toModel(PatientRequestDTO dto) {
+        if (dto == null) return null;
         Patient patient = new Patient();
-        patient.setName(patientDTO.getName());
-        patient.setAddress(patientDTO.getAddress());
-        patient.setEmail(patientDTO.getEmail());
-        patient.setRegisteredDate(LocalDate.parse(patientDTO.getRegisteredDate()));
-        patient.setDateOfBirth(LocalDate.parse(patientDTO.getDateOfBirth()));
+        patient.setName(dto.getName());
+        patient.setAddress(dto.getAddress());
+        patient.setEmail(dto.getEmail());
+        patient.setRegisteredDate(dto.getRegisteredDate() == null ? null : LocalDate.parse(dto.getRegisteredDate()));
+        patient.setDateOfBirth(dto.getDateOfBirth() == null ? null : LocalDate.parse(dto.getDateOfBirth()));
         return patient;
     }
 }

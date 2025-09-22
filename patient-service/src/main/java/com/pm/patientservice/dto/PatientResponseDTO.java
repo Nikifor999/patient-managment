@@ -7,6 +7,17 @@ public class PatientResponseDTO {
     private String address;
     private String dateOfBirth;
 
+    public PatientResponseDTO() {
+    }
+
+    public PatientResponseDTO(String id, String name, String email, String address, String dateOfBirth) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.dateOfBirth = dateOfBirth;
+    }
+
     public String getId() {
         return id;
     }
