@@ -30,6 +30,62 @@ public class Patient {
     @NotNull
     private LocalDate registeredDate;
 
+    public Patient(Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.email = builder.email;
+        this.address = builder.address;
+        this.dateOfBirth = builder.dateOfBirth;
+        this.registeredDate = builder.registeredDate;
+    }
+
+    public Patient() {
+
+    }
+
+    public static class Builder {
+        private UUID id;
+        private String name;
+        private String email;
+        private String address;
+        private LocalDate dateOfBirth;
+        private LocalDate registeredDate;
+
+        public Builder id (UUID id){
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder address(String address) {
+            this.address = address;
+            return this;
+        }
+
+        public Builder dateOfBirth(LocalDate dateOfBirth){
+            this.dateOfBirth = dateOfBirth;
+            return this;
+        }
+
+        public Builder registeredDate(LocalDate registeredDate){
+            this.registeredDate = registeredDate;
+            return this;
+        }
+
+        public Patient build() {
+            return new Patient(this);
+        }
+    }
+
     public UUID getId() {
         return id;
     }

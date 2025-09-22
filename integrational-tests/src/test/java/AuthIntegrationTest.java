@@ -54,4 +54,20 @@ public class AuthIntegrationTest {
                 .then()
                 .statusCode(401)
     }
+
+    @Test
+    public void shouldReturnAllPatients(){
+        //1. Arrange
+        //2.Act
+        Response response = given()
+                .contentType("application/json")
+                .when()
+                .get("/api/patients")
+                .then()
+                .statusCode(200)
+                .body("token", notNullValue())
+                .extract().response();
+
+        System.out.println("Generated Token: " + response.jsonPath().getString("token"));
+    }
 }
