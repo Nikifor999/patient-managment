@@ -27,8 +27,8 @@ public class BillingServiceGrpcClient {
         blockingStub = BillingServiceGrpc.newBlockingStub(channel);//technically its our grpc client that is gonna wait for the responses
     }
 
-    public BillingResponse createBillingAccount(String patientId, String name,
-                                                String email){
+    public BillingResponse createBillingAccount(String patientId,
+                                                String name, String email){
         BillingRequest request = BillingRequest.newBuilder()
                 .setPatientId(patientId)
                 .setEmail(email)
