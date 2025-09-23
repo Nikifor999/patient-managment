@@ -131,6 +131,7 @@ public class ServiceUnitTests {
         verify(billingServiceGrpcClient).createBillingAccount(String.valueOf(fakeId), name, email);
         verify(kafkaProducer).sendEvent(patient);
     }
+
     @Test
     @DisplayName("Shouldn't create a patient because of email unique Constraint")
     void shouldCreatePatientWithEmailUniqueConstraint() {
