@@ -14,14 +14,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -147,4 +151,34 @@ public class ServiceUnitTests {
         verifyNoInteractions(billingServiceGrpcClient, kafkaProducer);
     }
 
+    @ParameterizedTest
+    @MethodSource("idAndRequests")
+    void shouldUpdatePatientWithIdAndRequest(UUID id, PatientRequestDTO request) {
+        Patient patient = new Patient();
+        patient.setId(id);
+        when(repository.findById(id)).thenReturn(Optional.of(patient));
+        when(repository.existsByEmailAndIdNot(request.getEmail(), id)).thenReturn(false);
+        when(repository.save(any(Patient.class))).thenReturn(patient);
+
+        PatientResponseDTO result = patientService.updatePatient(id, request);
+
+        assertNotNull(result);
+        assertEquals(request.getName(), result.getName());
+        assertEquals(request.getEmail(), result.getEmail());
+        verify(repository).save(any(Patient.class));
+    }
+
+    public static Stream<Arguments> idAndRequests() {
+        return Stream.of(
+                Arguments.of(UUID.randomUUID(), new PatientRequestDTO(
+                        "name1", "email1@mail.com", "address1", "1995-11-11"
+                )), // maximum - 1
+                Arguments.of(UUID.randomUUID(), new PatientRequestDTO(
+                        "name2", "email2@mail.com", "address2","1995-09-12"
+                )), // exact maximum
+                Arguments.of(UUID.randomUUID(), new PatientRequestDTO(
+                        "name3", "email3@mail.com", "address3","1995-03-03"
+                )) // maximum + 1
+        );
+    }
 }
