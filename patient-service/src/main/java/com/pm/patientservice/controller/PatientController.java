@@ -7,6 +7,7 @@ import com.pm.patientservice.service.PatientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.groups.Default;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,8 @@ public class PatientController {
             @Validated({Default.class, CreatePatientValidationGroup.class})
             @RequestBody PatientRequestDTO patientRequestDTO) {
         PatientResponseDTO patientResponseDTO = patientService.createPatient(patientRequestDTO);
-        return ResponseEntity.ok(patientResponseDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(patientResponseDTO);
     }
 
     @PutMapping("/{id}")

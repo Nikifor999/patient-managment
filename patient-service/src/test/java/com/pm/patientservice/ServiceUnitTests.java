@@ -3,6 +3,7 @@ package com.pm.patientservice;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.exception.EmailAlreadyExistsException;
+import com.pm.patientservice.exception.PatientNotFoundException;
 import com.pm.patientservice.grpc.BillingServiceGrpcClient;
 import com.pm.patientservice.kafka.KafkaProducer;
 import com.pm.patientservice.mapper.PatientMapper;
@@ -168,16 +169,52 @@ public class ServiceUnitTests {
         verify(repository).save(any(Patient.class));
     }
 
+    @Test
+    void shouldNotUpdatePersonWhenSameEmailExists() {
+        PatientRequestDTO request = new PatientRequestDTO();
+        String email = "email_already_exists";
+        request.setEmail(email);
+        var id = patient1.getId();
+
+        when(repository.findById(id)).thenReturn(Optional.of(patient1));
+        when(repository.existsByEmailAndIdNot(email, id)).thenReturn(true);
+
+        EmailAlreadyExistsException exception =
+                assertThrows(EmailAlreadyExistsException.class,
+                () -> patientService.updatePatient(id, request));
+
+        verify(repository, never()).save(any());
+        assertTrue(exception.getMessage().contains(email));
+        assertTrue(exception.getMessage().contains("email already exists"));
+    }
+
+    @Test
+    void shouldNotUpdatePersonWhenPatientDoNotExist() {
+        PatientRequestDTO request = new PatientRequestDTO();
+        var id = patient1.getId();
+
+        when(repository.findById(id)).thenReturn(Optional.empty());
+
+        PatientNotFoundException exception =
+                assertThrows(PatientNotFoundException.class,
+                        () -> patientService.updatePatient(id, request));
+
+        verify(repository, never()).save(any());
+        verify(repository, never()).existsByEmailAndIdNot("email",id);
+        assertTrue(exception.getMessage().contains(id.toString()));
+        assertTrue(exception.getMessage().contains("Patient not found with ID:"));
+    }
+
     public static Stream<Arguments> idAndRequests() {
         return Stream.of(
                 Arguments.of(UUID.randomUUID(), new PatientRequestDTO(
                         "name1", "email1@mail.com", "address1", "1995-11-11"
                 )), // maximum - 1
                 Arguments.of(UUID.randomUUID(), new PatientRequestDTO(
-                        "name2", "email2@mail.com", "address2","1995-09-12"
+                        "name2", "email2@mail.com", "address2", "1995-09-12"
                 )), // exact maximum
                 Arguments.of(UUID.randomUUID(), new PatientRequestDTO(
-                        "name3", "email3@mail.com", "address3","1995-03-03"
+                        "name3", "email3@mail.com", "address3", "1995-03-03"
                 )) // maximum + 1
         );
     }
