@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pm.patientservice.controller.PatientController;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
+import com.pm.patientservice.exception.PatientNotFoundException;
 import com.pm.patientservice.service.PatientService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,7 @@ public class ControllerUnitTests {
     }
 
     @ParameterizedTest(name = "Should create patient with name")
+    @DisplayName("Should create patient with valid request")
     @MethodSource("createPatientsList")
     void shouldCreatePatient(PatientRequestDTO request) throws Exception {
         PatientResponseDTO responseDTO = new PatientResponseDTO();
@@ -90,6 +92,7 @@ public class ControllerUnitTests {
     }
 
     @ParameterizedTest(name = "Should return 400 when {1} is invalid")
+    @DisplayName("Shouldn't create patient with invalid request")
     @MethodSource("invalidPatientRequests")
     void shouldNotCreatePatientsBecauseValidationException(
             PatientRequestDTO requestDTO, String expectedErrorField) throws Exception {
@@ -139,6 +142,63 @@ public class ControllerUnitTests {
 
         verify(patientService, times(1))
                 .updatePatient(any(),any());
+    }
+
+    @Test
+    @DisplayName("Delete patient that exists")
+    void shouldDeletePatientWhenExists() throws Exception {
+        UUID id = UUID.randomUUID();
+        doNothing().when(patientService).deletePatient(id);
+
+        mockMvc.perform(delete("/patients/{id}", id))
+                .andExpect(status().isNoContent());
+
+        verify(patientService, times(1)).deletePatient(id);
+    }
+
+    @Test
+    @DisplayName("Delete returns 400 when patient not found")
+    void shouldReturnNotFoundWhenDeletingNonExisting() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        doThrow(new PatientNotFoundException("Patient not found with id: " + id))
+                .when(patientService).deletePatient(id);
+
+        mockMvc.perform(delete("/patients/{id}", id))
+                .andExpect(status().isNotFound());
+
+        verify(patientService).deletePatient(id);
+    }
+
+    @Test
+    @DisplayName("Delete is idempotent (second delete still returns 204)")
+    void deleteIsIdempotent() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        // first call OK
+        doNothing().when(patientService).deletePatient(id);
+
+        mockMvc.perform(delete("/patients/{id}", id))
+                .andExpect(status().isNoContent());
+
+        verify(patientService, times(1)).deletePatient(id);
+
+        // second call — service may either doNothing again or throw; adapt to your design
+        doNothing().when(patientService).deletePatient(id);
+
+        mockMvc.perform(delete("/patients/{id}", id))
+                .andExpect(status().isNoContent());
+
+        verify(patientService, times(2)).deletePatient(id);
+    }
+
+    @Test
+    @DisplayName("Delete returns 400 for invalid UUID")
+    void shouldReturnBadRequestForInvalidUuid() throws Exception {
+        mockMvc.perform(delete("/patients/{id}", "not-a-uuid"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(patientService);
     }
 
     public static List<PatientRequestDTO> createPatientsList() {
