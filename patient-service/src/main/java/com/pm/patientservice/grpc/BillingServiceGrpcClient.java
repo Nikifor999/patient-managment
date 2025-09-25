@@ -7,6 +7,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,20 +16,31 @@ public class BillingServiceGrpcClient {
     private static final Logger log = LoggerFactory.getLogger(BillingServiceGrpcClient.class);
     private final BillingServiceGrpc.BillingServiceBlockingStub blockingStub;
 
+    @Autowired
     public BillingServiceGrpcClient(
             @Value("${billing.service.address:localhost}") String serverAddress,
-            @Value("${billing.service.grpc.port:9001}") int serverPort){
-
-        log.info("Connecting to Billing Grpc Service at {}:{}" ,serverAddress, serverPort);
-
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(serverAddress,
-                serverPort).usePlaintext().build();
-
-        blockingStub = BillingServiceGrpc.newBlockingStub(channel);//technically its our grpc client that is gonna wait for the responses
+            @Value("${billing.service.grpc.port:9001}") int serverPort) {
+        this(createStub(serverAddress, serverPort));
     }
 
-    public BillingResponse createBillingAccount(String patientId,
-                                                String name, String email){
+    // Constructor for testing - inject the stub directly
+    public BillingServiceGrpcClient(BillingServiceGrpc.BillingServiceBlockingStub blockingStub) {
+        this.blockingStub = blockingStub;
+    }
+
+    private static BillingServiceGrpc.BillingServiceBlockingStub createStub(
+            String serverAddress, int serverPort) {
+
+        ManagedChannel channel = ManagedChannelBuilder
+                .forAddress(serverAddress, serverPort)
+                .usePlaintext()
+                .build();
+        return BillingServiceGrpc.newBlockingStub(channel);
+    }
+
+    public BillingResponse createBillingAccount(
+            String patientId, String name, String email) {
+
         BillingRequest request = BillingRequest.newBuilder()
                 .setPatientId(patientId)
                 .setEmail(email)
