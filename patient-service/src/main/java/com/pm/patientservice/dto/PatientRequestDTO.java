@@ -10,18 +10,8 @@ import java.time.LocalDate;
 
 public class PatientRequestDTO {
     @NotBlank(message = "Name is required")
-    @Size(max=100, message = "Name cannot exceed 100 characters limit")
+    @Size(max = 100, message = "Name cannot exceed 100 characters limit")
     private String name;
-
-    public PatientRequestDTO() {
-    }
-
-    public PatientRequestDTO(String name, String email, String address, String birthdate) {
-        this.name = name;
-        this.email = email;
-        this.address = address;
-        this.dateOfBirth = birthdate;
-    }
 
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
@@ -36,6 +26,16 @@ public class PatientRequestDTO {
     @NotBlank(groups = CreatePatientValidationGroup.class, message =
             "RegisteredDate is required")
     private String registeredDate;
+
+    public PatientRequestDTO() {
+    }
+
+    public PatientRequestDTO(String name, String email, String address, String birthdate) {
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.dateOfBirth = birthdate;
+    }
 
     public @NotBlank(message = "Name is required") @Size(max = 100, message = "Name cannot exceed 100 characters limit") String getName() {
         return name;

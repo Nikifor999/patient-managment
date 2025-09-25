@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.groups.Default;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +44,14 @@ public class PatientController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a new Patient")
-    public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable UUID id,
-                                                            @Validated({Default.class}) @RequestBody PatientRequestDTO patientRequestDTO) {
+    public ResponseEntity<PatientResponseDTO> updatePatient(
+            @PathVariable UUID id,
+            @Validated({Default.class}) @RequestBody PatientRequestDTO patientRequestDTO) {
+
         PatientResponseDTO updatedPatientResponseDTO = patientService.updatePatient(id, patientRequestDTO);
-        return ResponseEntity.ok(updatedPatientResponseDTO);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(updatedPatientResponseDTO);
     }
 
     @DeleteMapping("/{id}")

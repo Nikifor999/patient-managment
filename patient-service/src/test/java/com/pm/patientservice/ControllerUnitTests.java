@@ -24,8 +24,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PatientController.class)
@@ -92,7 +91,8 @@ public class ControllerUnitTests {
 
     @ParameterizedTest(name = "Should return 400 when {1} is invalid")
     @MethodSource("invalidPatientRequests")
-    void shouldNotCreatePatientsBecauseValidationException(PatientRequestDTO requestDTO, String expectedErrorField) throws Exception {
+    void shouldNotCreatePatientsBecauseValidationException(
+            PatientRequestDTO requestDTO, String expectedErrorField) throws Exception {
         requestDTO.setRegisteredDate("1990-10-10");
         String reqBody = new ObjectMapper().writeValueAsString(requestDTO);
 
@@ -106,6 +106,39 @@ public class ControllerUnitTests {
 
         verify(patientService, never())
                 .createPatient(any());
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("createPatientsList")
+    @DisplayName("Should update patient")
+    void shouldUpdatePatient(PatientRequestDTO requestDTO) throws Exception {
+        UUID id = UUID.randomUUID();
+        PatientResponseDTO responseDTO = new PatientResponseDTO();
+        responseDTO.setAddress(requestDTO.getAddress());
+        responseDTO.setEmail(requestDTO.getEmail());
+        responseDTO.setDateOfBirth(requestDTO.getDateOfBirth());
+        responseDTO.setName(requestDTO.getName());
+        responseDTO.setId(id.toString());
+        String reqBody = new ObjectMapper().writeValueAsString(requestDTO);
+
+        when(patientService.updatePatient(eq(id), any(PatientRequestDTO.class)))
+                .thenReturn(responseDTO);
+
+        var response = mockMvc.perform(put("/patients/"+id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(reqBody));
+
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.name").value(requestDTO.getName()))
+                .andExpect(jsonPath("$.email").value(requestDTO.getEmail()))
+                .andExpect(jsonPath("$.address").value(requestDTO.getAddress()))
+                .andExpect(jsonPath("$.dateOfBirth").value(requestDTO.getDateOfBirth()));
+
+        verify(patientService, times(1))
+                .updatePatient(any(),any());
     }
 
     public static List<PatientRequestDTO> createPatientsList() {
