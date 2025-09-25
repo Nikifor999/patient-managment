@@ -157,20 +157,6 @@ public class ControllerUnitTests {
     }
 
     @Test
-    @DisplayName("Delete returns 400 when patient not found")
-    void shouldReturnNotFoundWhenDeletingNonExisting() throws Exception {
-        UUID id = UUID.randomUUID();
-
-        doThrow(new PatientNotFoundException("Patient not found with id: " + id))
-                .when(patientService).deletePatient(id);
-
-        mockMvc.perform(delete("/patients/{id}", id))
-                .andExpect(status().isNotFound());
-
-        verify(patientService).deletePatient(id);
-    }
-
-    @Test
     @DisplayName("Delete is idempotent (second delete still returns 204)")
     void deleteIsIdempotent() throws Exception {
         UUID id = UUID.randomUUID();

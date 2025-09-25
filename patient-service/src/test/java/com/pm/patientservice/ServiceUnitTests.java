@@ -205,6 +205,27 @@ public class ServiceUnitTests {
         assertTrue(exception.getMessage().contains("Patient not found with ID:"));
     }
 
+    @Test
+    @DisplayName("Should delete patient")
+    void shouldDeletePatientById(){
+        UUID id = UUID.randomUUID();
+        doNothing().when(repository).deleteById(id);
+
+        patientService.deletePatient(id);
+
+        verify(repository, times(1)).deleteById(eq(id));
+    }
+
+    @Test
+    @DisplayName("Should propagate exception when repository throws")
+    void shouldThrowExceptionWhenRepositoryFails() {
+        UUID id = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("Invalid id"))
+                .when(repository).deleteById(id);
+
+        assertThrows(IllegalArgumentException.class, () -> patientService.deletePatient(id));
+    }
+
     public static Stream<Arguments> idAndRequests() {
         return Stream.of(
                 Arguments.of(UUID.randomUUID(), new PatientRequestDTO(
