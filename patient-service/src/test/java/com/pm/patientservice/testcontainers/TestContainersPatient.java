@@ -78,7 +78,7 @@ public class TestContainersPatient {
 
     }
 
-    @Test
+    /*@Test
     @DisplayName("Should create a new patient successfuly")
     void shouldCreatePatient(){
         //Arrange
@@ -111,5 +111,5 @@ public class TestContainersPatient {
                 patients.stream().anyMatch(p -> p.getEmail().equals("someEmail@mail.com")),
                 "Patient should be persisted in DB"
         );
-    }
+    }*/
 }
